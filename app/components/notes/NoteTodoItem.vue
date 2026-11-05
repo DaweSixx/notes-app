@@ -50,7 +50,7 @@ onBeforeUnmount(() => window.removeEventListener("resize", resize));
 </script>
 
 <template>
-  <li class="todo" :class="{ done: todo.done }" :data-todo-id="todo.id">
+  <li class="todo" :class="{ done: todo.done, empty: !todo.text.trim() }" :data-todo-id="todo.id">
     <BaseCheckbox :model-value="todo.done" :label="t('editor.toggleTodo')" @update:model-value="emit('toggle')" />
     <textarea
       ref="field"
@@ -90,6 +90,16 @@ onBeforeUnmount(() => window.removeEventListener("resize", resize));
 
   :deep(.check) {
     margin-top: 9px;
+  }
+
+  // empty todos are dropped on save — mark them while the user is elsewhere
+  &.empty:not(:focus-within) {
+    background: rgba(245, 158, 11, 0.08);
+
+    .text::placeholder {
+      color: var(--warning-text);
+      opacity: 1;
+    }
   }
 }
 

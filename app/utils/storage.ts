@@ -19,11 +19,11 @@ export interface LoadResult {
 // key = version to migrate from; each step returns data of the next version
 const migrations: Record<number, (data: Record<string, unknown>) => Record<string, unknown>> = {};
 
-function isObject(value: unknown): value is Record<string, unknown> {
+export function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null;
 }
 
-function isTodo(value: unknown): value is Todo {
+export function isTodo(value: unknown): value is Todo {
   return (
     isObject(value) &&
     typeof value.id === "string" &&

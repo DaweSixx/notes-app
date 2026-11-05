@@ -1,6 +1,7 @@
 <script setup lang="ts">
 defineProps<{
   dirty: boolean;
+  canSave: boolean;
   canUndo: boolean;
   canRedo: boolean;
 }>();
@@ -37,7 +38,7 @@ const { t } = useI18n();
       @click="emit('redo')"
     />
     <span class="divider" aria-hidden="true" />
-    <BaseButton size="sm" icon="save" :disabled="!dirty" :title="t('editor.saveTip')" @click="emit('save')">
+    <BaseButton size="sm" icon="save" :disabled="!canSave" :title="t('editor.saveTip')" @click="emit('save')">
       <span class="label">{{ t("editor.save") }}</span>
     </BaseButton>
   </div>

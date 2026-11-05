@@ -5,8 +5,10 @@ import NoteTodoAdd from "~/components/notes/NoteTodoAdd.vue";
 import NoteTodoItem from "~/components/notes/NoteTodoItem.vue";
 import { useNotesStore } from "~/stores/notes";
 import type { NoteInput } from "~/types/note";
+import { NEW_NOTE_DRAFT, type Draft } from "~/utils/drafts";
 import { formatRelativeDate } from "~/utils/format-date";
 import type { OperationTarget } from "~/utils/note-operations";
+import { isBlankNote, isBlankText, normalizeForSave } from "~/utils/note-rules";
 
 const props = defineProps<{
   noteId: string | null;
@@ -26,6 +28,69 @@ const { draft, isDirty, canUndo, canRedo, canSortPendingFirst } = editor;
 
 const noteId = ref(props.noteId);
 const updatedAt = ref(props.updatedAt);
+const removedHere = ref(false);
+
+const deletedElsewhere = computed(
+  () => noteId.value !== null && !removedHere.value && !store.getById(noteId.value),
+);
+const blank = computed(() => isBlankNote(draft));
+// a note that doesn't exist yet (new, or deleted in another tab) can't be saved empty
+const canSave = computed(() => {
+  const willCreate = noteId.value === null || deletedElsewhere.value;
+  if (willCreate) return !blank.value;
+  return isDirty.value;
+});
+const showTitleHint = computed(() => isBlankText(draft.title) && !blank.value);
+
+// drafts
+const pendingDraft = shallowRef<Draft | null>(null);
+
+// sync: has to run before useDraft reacts to the same edit and schedules a new draft write
+watch(
+  () => JSON.stringify(draft),
+  () => {
+    if (pendingDraft.value) declineDraft();
+  },
+  { flush: "sync" },
+);
+
+const drafts = useDraft({
+  key: () => noteId.value ?? NEW_NOTE_DRAFT,
+  content: () => draft,
+  isDirty,
+  baseUpdatedAt: () => updatedAt.value,
+});
+
+const foundDraft = drafts.read();
+if (foundDraft) {
+  const sameAsSaved =
+    JSON.stringify({ title: foundDraft.title, todos: foundDraft.todos }) ===
+    JSON.stringify({ title: props.initial.title, todos: props.initial.todos });
+  if (sameAsSaved) drafts.discard();
+  else pendingDraft.value = foundDraft;
+}
+
+const draftText = computed(() => {
+  const found = pendingDraft.value;
+  if (!found) return "";
+  const date = formatRelativeDate(found.savedAt, locale.value);
+  return found.baseUpdatedAt === props.updatedAt
+    ? t("draft.foundText", { date })
+    : t("draft.foundStale", { date });
+});
+
+function restoreDraft() {
+  const found = pendingDraft.value;
+  if (!found) return;
+  pendingDraft.value = null;
+  editor.restore({ title: found.title, todos: found.todos });
+  toast.show(t("draft.restored"));
+}
+
+function declineDraft() {
+  pendingDraft.value = null;
+  drafts.discard();
+}
 
 const total = computed(() => draft.todos.length);
 const done = computed(() => draft.todos.filter((todo) => todo.done).length);
@@ -100,45 +165,58 @@ function onRemove(id: string) {
 
 function save() {
   editor.commitText();
-  if (!isDirty.value) return;
+  if (!canSave.value) return;
 
-  const input: NoteInput = {
-    title: draft.title,
-    todos: draft.todos.map((todo) => ({ id: todo.id, text: todo.text, done: todo.done })),
-  };
+  const { input, removedEmpty } = normalizeForSave(draft);
+  const previousDraftKey = noteId.value ?? NEW_NOTE_DRAFT;
 
+  let savedAt: number;
   try {
-    if (noteId.value === null) {
+    const existing = noteId.value === null ? undefined : store.getById(noteId.value);
+    if (existing) {
+      savedAt = store.update(existing.id, input)?.updatedAt ?? Date.now();
+    } else {
       const note = store.create(input);
       noteId.value = note.id;
+      savedAt = note.updatedAt;
       emit("created", note.id);
-    } else if (!store.update(noteId.value, input)) {
-      toast.show(t("editor.saveFailed"), "warn");
-      return;
     }
   } catch {
     toast.show(t("editor.saveFailed"), "warn");
     return;
   }
 
-  editor.markSaved();
-  updatedAt.value = Date.now();
-  toast.show(t("editor.saved"));
+  // the draft key changes when a note gets created — drop the one stored under the old key
+  if (previousDraftKey !== noteId.value) drafts.discard(previousDraftKey);
+  editor.markSaved(input);
+  updatedAt.value = savedAt;
+  toast.show(removedEmpty ? t("editor.savedRemoved", { n: removedEmpty }, removedEmpty) : t("editor.saved"));
 }
 
 async function cancel() {
   editor.commitText();
-  if (isDirty.value) {
-    const confirmed = await modal.open(ConfirmModal, {
-      title: t("editor.cancelTitle"),
-      text: t("editor.cancelText"),
-      confirmText: t("editor.cancelConfirm"),
-      cancelText: t("editor.cancelKeep"),
-      tone: "warn",
-    });
-    if (!confirmed) return;
-  }
+  const confirmed = await modal.open(
+    ConfirmModal,
+    isDirty.value
+      ? {
+          title: t("editor.cancelTitle"),
+          text: t("editor.cancelText"),
+          confirmText: t("editor.cancelConfirm"),
+          cancelText: t("editor.cancelKeep"),
+          tone: "warn",
+        }
+      : {
+          title: t("editor.closeTitle"),
+          text: t("editor.closeText"),
+          confirmText: t("editor.closeConfirm"),
+          cancelText: t("editor.cancelKeep"),
+          tone: "warn",
+        },
+  );
+  if (!confirmed) return;
+  pendingDraft.value = null;
   editor.discardChanges();
+  drafts.discard();
   await navigateTo("/");
 }
 
@@ -149,8 +227,15 @@ async function remove() {
     confirmText: t("common.delete"),
   });
   if (!confirmed || noteId.value === null) return;
+  removedHere.value = true;
+  drafts.discard();
   store.remove(noteId.value);
   toast.show(t("home.deleted"));
+  await navigateTo("/");
+}
+
+async function leaveDeleted() {
+  drafts.discard();
   await navigateTo("/");
 }
 
@@ -171,12 +256,42 @@ function lockHeight(el: Element) {
   <div class="note-editor">
     <NoteEditorToolbar
       :dirty="isDirty"
+      :can-save="canSave"
       :can-undo="canUndo"
       :can-redo="canRedo"
       @undo="undo"
       @redo="redo"
       @save="save"
     />
+
+    <Transition name="notice">
+      <BaseNotice
+        v-if="deletedElsewhere"
+        key="deleted"
+        tone="danger"
+        icon="alert"
+        :title="t('editor.deletedTitle')"
+        :text="t('editor.deletedText')"
+      >
+        <template #actions>
+          <BaseButton variant="plain" size="sm" @click="leaveDeleted">{{ t("editor.toList") }}</BaseButton>
+          <BaseButton size="sm" :disabled="!canSave" @click="save">{{ t("editor.saveAsNew") }}</BaseButton>
+        </template>
+      </BaseNotice>
+      <BaseNotice
+        v-else-if="pendingDraft"
+        key="draft"
+        tone="warn"
+        icon="history"
+        :title="t('draft.found')"
+        :text="draftText"
+      >
+        <template #actions>
+          <BaseButton variant="plain" size="sm" @click="declineDraft">{{ t("draft.decline") }}</BaseButton>
+          <BaseButton size="sm" @click="restoreDraft">{{ t("draft.restore") }}</BaseButton>
+        </template>
+      </BaseNotice>
+    </Transition>
 
     <article class="sheet">
       <p class="eyebrow">{{ eyebrow }}</p>
@@ -191,6 +306,12 @@ function lockHeight(el: Element) {
         @blur="editor.commitText()"
         @keydown.enter.prevent="focusAfter(undefined)"
       />
+      <Transition name="hint">
+        <p v-if="showTitleHint" class="hint">
+          <BaseIcon name="alert" :size="14" />
+          {{ t("editor.titleHint") }}
+        </p>
+      </Transition>
 
       <div class="progress-row">
         <BaseProgress :done="done" :total="total" size="md" class="progress" />
@@ -232,7 +353,12 @@ function lockHeight(el: Element) {
 
     <div class="foot">
       <BaseButton variant="plain" icon="x" @click="cancel">{{ t("editor.cancel") }}</BaseButton>
-      <BaseButton v-if="noteId !== null" variant="danger-ghost" icon="trash" @click="remove">
+      <BaseButton
+        v-if="noteId !== null && !deletedElsewhere"
+        variant="danger-ghost"
+        icon="trash"
+        @click="remove"
+      >
         {{ t("editor.delete") }}
       </BaseButton>
     </div>
@@ -281,6 +407,33 @@ function lockHeight(el: Element) {
     color: var(--muted);
     opacity: 0.55;
   }
+}
+
+.hint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--warning-text);
+}
+
+.hint-enter-active,
+.hint-leave-active,
+.notice-enter-active,
+.notice-leave-active {
+  transition:
+    opacity 0.3s var(--ease),
+    transform 0.3s var(--ease);
+}
+
+.hint-enter-from,
+.hint-leave-to,
+.notice-enter-from,
+.notice-leave-to {
+  opacity: 0;
+  transform: translateY(-6px);
 }
 
 .progress-row {

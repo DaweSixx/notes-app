@@ -8,6 +8,7 @@ const { locale, t } = useI18n();
 const store = useNotesStore();
 const modal = useModal();
 const toast = useToast();
+const draftKeys = useDraftKeys();
 
 const today = computed(() =>
   new Intl.DateTimeFormat(locale.value, { weekday: "long", day: "numeric", month: "long" }).format(
@@ -27,6 +28,7 @@ const stats = computed(() => {
 const now = ref(Date.now());
 let clock: ReturnType<typeof setInterval> | undefined;
 onMounted(() => {
+  draftKeys.refresh();
   clock = setInterval(() => (now.value = Date.now()), 60_000);
 });
 onBeforeUnmount(() => clearInterval(clock));
@@ -39,6 +41,7 @@ async function onDelete(note: Note) {
   });
   if (!confirmed) return;
   store.remove(note.id);
+  draftKeys.remove(note.id);
   toast.show(t("home.deleted"));
 }
 
@@ -83,6 +86,7 @@ function onBeforeLeave(el: Element) {
           :note="note"
           :index="index"
           :now="now"
+          :has-draft="draftKeys.has(note.id)"
           @delete="onDelete(note)"
         />
         <NuxtLink key="new" to="/notes/new" class="new-card" :style="{ '--i': store.notes.length }">

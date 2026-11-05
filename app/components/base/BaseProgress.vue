@@ -42,19 +42,29 @@ const complete = computed(() => props.total > 0 && props.done === props.total);
   width: var(--p);
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, var(--primary), var(--pink));
+  // the gradient repeats its first color at the end so the flowing loop has no visible seam
+  background-image: linear-gradient(90deg, var(--primary), var(--pink), var(--primary));
+  background-size: 200% 100%;
   transition: width 0.6s var(--ease);
-  animation: grow 1s var(--ease) both;
-  animation-delay: var(--progress-delay, 0s);
+  animation:
+    grow 1s var(--ease) both,
+    flow 4s linear infinite;
+  animation-delay: var(--progress-delay, 0s), 0s;
 
   .complete & {
-    background: linear-gradient(90deg, #10b981, #34d399);
+    background-image: linear-gradient(90deg, #10b981, #6ee7b7, #10b981);
   }
 }
 
 @keyframes grow {
   from {
     width: 0;
+  }
+}
+
+@keyframes flow {
+  to {
+    background-position: 200% 0;
   }
 }
 </style>

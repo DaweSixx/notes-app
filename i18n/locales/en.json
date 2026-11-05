@@ -40,7 +40,8 @@
     "noTodos": "No tasks yet",
     "emptyTodo": "Empty task",
     "edit": "Edit",
-    "delete": "Delete"
+    "delete": "Delete",
+    "draft": "Draft"
   },
   "editor": {
     "back": "Back",
@@ -72,7 +73,24 @@
     "cancelConfirm": "Discard changes",
     "cancelKeep": "Keep editing",
     "saved": "Note saved",
-    "saveFailed": "Couldn't save the note — browser storage is unavailable or full"
+    "savedRemoved": "Note saved | Note saved, {n} empty task removed | Note saved, {n} empty tasks removed",
+    "saveFailed": "Couldn't save the note — browser storage is unavailable or full",
+    "closeTitle": "Close the editor?",
+    "closeText": "There are no changes — the note stays as it is.",
+    "closeConfirm": "Close",
+    "titleHint": "The title is empty — the note will be saved as “Untitled”",
+    "deletedTitle": "This note was deleted in another tab",
+    "deletedText": "Your edits aren't lost — save them as a new note or go back to the list.",
+    "toList": "Back to list",
+    "saveAsNew": "Save as new"
+  },
+  "draft": {
+    "found": "Unsaved draft found",
+    "foundText": "Saved {date} — restore those changes?",
+    "foundStale": "Saved {date}, but the note has changed since — restoring will replace those edits.",
+    "restore": "Restore",
+    "decline": "Dismiss",
+    "restored": "Draft restored"
   },
   "notFound": {
     "title": "Note not found",

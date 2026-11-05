@@ -2,6 +2,7 @@ import { computed, getCurrentScope, onScopeDispose, reactive, readonly, shallowR
 import type { NoteInput, Todo } from "~/types/note";
 import { createHistory } from "~/utils/history";
 import { createId } from "~/utils/id";
+import type { NoteContent } from "~/utils/note-rules";
 import {
   applyOperation,
   invertOperation,
@@ -12,7 +13,7 @@ import {
 
 export const TEXT_COMMIT_DELAY = 1000;
 
-function cloneInput(input: NoteInput): NoteInput {
+function cloneInput(input: NoteContent): NoteInput {
   return { title: input.title, todos: input.todos.map((todo) => ({ ...todo })) };
 }
 
@@ -115,7 +116,7 @@ export function useNoteEditor(initial: NoteInput) {
     return op && applyOperation(draft, op);
   }
 
-  function replaceDraft(input: NoteInput) {
+  function replaceDraft(input: NoteContent) {
     draft.title = input.title;
     draft.todos = input.todos.map((todo) => ({ ...todo }));
   }
@@ -126,9 +127,17 @@ export function useNoteEditor(initial: NoteInput) {
     history.clear();
   }
 
-  function markSaved() {
+  // `input` is the normalized version that actually got saved (e.g. without empty todos)
+  function markSaved(input?: NoteContent) {
     clearHistory();
+    if (input) replaceDraft(input);
     baseline.value = cloneInput(draft);
+  }
+
+  // loads a recovered draft on top of the saved version: dirty, but with a fresh history
+  function restore(input: NoteContent) {
+    clearHistory();
+    replaceDraft(input);
   }
 
   function discardChanges() {
@@ -155,5 +164,6 @@ export function useNoteEditor(initial: NoteInput) {
     redo,
     markSaved,
     discardChanges,
+    restore,
   };
 }

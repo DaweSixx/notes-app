@@ -8,6 +8,7 @@ const props = defineProps<{
   note: Note;
   index: number;
   now: number;
+  hasDraft: boolean;
 }>();
 
 const emit = defineEmits<{ delete: [] }>();
@@ -42,7 +43,8 @@ function onPointerMove(event: PointerEvent) {
           {{ note.title || t("note.untitled") }}
         </NuxtLink>
       </h3>
-      <BaseBadge v-if="complete" variant="success" icon="check">{{ t("card.done") }}</BaseBadge>
+      <BaseBadge v-if="hasDraft" variant="draft" icon="history">{{ t("card.draft") }}</BaseBadge>
+      <BaseBadge v-else-if="complete" variant="success" icon="check">{{ t("card.done") }}</BaseBadge>
     </div>
 
     <template v-if="total">

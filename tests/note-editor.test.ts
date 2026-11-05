@@ -277,6 +277,31 @@ describe("note editor", () => {
       expect(editor.canRedo.value).toBe(false);
     });
 
+    it("restore loads a draft over the saved version without history", () => {
+      const editor = useNoteEditor(makeInput());
+      editor.toggleTodo("a");
+
+      editor.restore({ title: "Groceries", todos: [{ id: "c", text: "Eggs", done: false }] });
+
+      expect(editor.draft.title).toBe("Groceries");
+      expect(editor.draft.todos.map((t) => t.id)).toEqual(["c"]);
+      expect(editor.isDirty.value).toBe(true);
+      expect(editor.canUndo.value).toBe(false);
+
+      editor.discardChanges();
+      expect(editor.draft).toEqual(makeInput());
+    });
+
+    it("markSaved with a normalized version replaces the draft and the baseline", () => {
+      const editor = useNoteEditor(makeInput());
+      editor.addTodo("  ");
+
+      editor.markSaved(makeInput());
+
+      expect(editor.draft).toEqual(makeInput());
+      expect(editor.isDirty.value).toBe(false);
+    });
+
     it("does not mutate the initial input", () => {
       const input = makeInput();
       const editor = useNoteEditor(input);
