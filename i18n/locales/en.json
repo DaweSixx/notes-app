@@ -42,6 +42,43 @@
     "edit": "Edit",
     "delete": "Delete"
   },
+  "editor": {
+    "back": "Back",
+    "statusSaved": "All changes saved",
+    "statusUnsaved": "Unsaved changes",
+    "undo": "Undo change",
+    "undoTip": "Undo · Ctrl+Z",
+    "redo": "Redo change",
+    "redoTip": "Redo · Ctrl+Shift+Z",
+    "save": "Save",
+    "saveTip": "Save · Ctrl+S",
+    "new": "New note",
+    "updated": "Edited {date}",
+    "titleLabel": "Note title",
+    "sortPendingFirst": "Unfinished to top",
+    "toggleTodo": "Mark as done",
+    "todoText": "Task text",
+    "todoPlaceholder": "Describe the task…",
+    "removeTodo": "Delete task",
+    "addPlaceholder": "Add a task…",
+    "addLabel": "New task",
+    "shortcutUndo": "undo",
+    "shortcutRedo": "redo",
+    "shortcutSave": "save",
+    "cancel": "Cancel editing",
+    "delete": "Delete note",
+    "cancelTitle": "Cancel editing?",
+    "cancelText": "All changes since the last save will be lost.",
+    "cancelConfirm": "Discard changes",
+    "cancelKeep": "Keep editing",
+    "saved": "Note saved",
+    "saveFailed": "Couldn't save the note — browser storage is unavailable or full"
+  },
+  "notFound": {
+    "title": "Note not found",
+    "text": "It may have been deleted, or the link is outdated.",
+    "back": "Back to notes"
+  },
   "storage": {
     "recovered": "Saved notes couldn't be read — a backup copy was kept"
   }

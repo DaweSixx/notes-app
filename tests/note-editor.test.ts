@@ -159,6 +159,61 @@ describe("note editor", () => {
     });
   });
 
+  describe("sort pending first", () => {
+    function makeMixed(): NoteInput {
+      return {
+        title: "Mixed",
+        todos: [
+          { id: "x", text: "X", done: true },
+          { id: "y", text: "Y", done: false },
+          { id: "z", text: "Z", done: true },
+          { id: "w", text: "W", done: false },
+        ],
+      };
+    }
+
+    const order = (editor: ReturnType<typeof useNoteEditor>) => editor.draft.todos.map((t) => t.id);
+
+    it("moves unfinished todos up keeping the order inside each group", () => {
+      const editor = useNoteEditor(makeMixed());
+
+      editor.sortPendingFirst();
+
+      expect(order(editor)).toEqual(["y", "w", "x", "z"]);
+      expect(editor.canSortPendingFirst.value).toBe(false);
+    });
+
+    it("is a single undoable step", () => {
+      const editor = useNoteEditor(makeMixed());
+
+      editor.sortPendingFirst();
+      expect(editor.undo()).toEqual({ field: "list" });
+      expect(order(editor)).toEqual(["x", "y", "z", "w"]);
+      expect(editor.canUndo.value).toBe(false);
+
+      editor.redo();
+      expect(order(editor)).toEqual(["y", "w", "x", "z"]);
+    });
+
+    it("does nothing when the list is already sorted", () => {
+      const editor = useNoteEditor(makeInput());
+
+      expect(editor.canSortPendingFirst.value).toBe(false);
+      editor.sortPendingFirst();
+
+      expect(editor.canUndo.value).toBe(false);
+    });
+
+    it("does not keep sorting on later toggles", () => {
+      const editor = useNoteEditor(makeMixed());
+
+      editor.sortPendingFirst();
+      editor.toggleTodo("y");
+
+      expect(order(editor)).toEqual(["y", "w", "x", "z"]);
+    });
+  });
+
   describe("redo branch", () => {
     it("is cleared by a new change after undo", () => {
       const editor = useNoteEditor(makeInput());

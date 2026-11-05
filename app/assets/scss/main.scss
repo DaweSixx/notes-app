@@ -67,6 +67,17 @@ kbd {
   white-space: nowrap;
 }
 
+// briefly highlights what undo/redo just changed
+.flash {
+  animation: flash 0.9s var(--ease);
+}
+
+@keyframes flash {
+  from {
+    background-color: rgba(139, 92, 246, 0.22);
+  }
+}
+
 .page-enter-active,
 .page-leave-active {
   transition:

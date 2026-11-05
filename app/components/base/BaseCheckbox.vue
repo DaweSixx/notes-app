@@ -6,8 +6,8 @@ const model = defineModel<boolean>({ required: true });
 // pop only on user interaction, not when an already-checked box is rendered
 const pop = ref(false);
 
-function onChange() {
-  pop.value = model.value;
+function onChange(event: Event) {
+  pop.value = (event.target as HTMLInputElement).checked;
 }
 </script>
 

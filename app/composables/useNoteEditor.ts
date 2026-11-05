@@ -34,6 +34,10 @@ export function useNoteEditor(initial: NoteInput) {
   const canUndo = computed(() => history.canUndo.value || hasPendingChange.value);
   const canRedo = computed(() => history.canRedo.value && !hasPendingChange.value);
   const isDirty = computed(() => JSON.stringify(draft) !== JSON.stringify(baseline.value));
+  const canSortPendingFirst = computed(() => {
+    const firstDone = draft.todos.findIndex((t) => t.done);
+    return firstDone !== -1 && draft.todos.slice(firstDone).some((t) => !t.done);
+  });
 
   function stopTimer() {
     clearTimeout(timer);
@@ -91,6 +95,14 @@ export function useNoteEditor(initial: NoteInput) {
     record({ type: "removeTodo", todo: { ...todo }, index });
   }
 
+  // one-off reorder: unfinished first, relative order inside each group is kept
+  function sortPendingFirst() {
+    if (!canSortPendingFirst.value) return;
+    const from = draft.todos.map((t) => t.id);
+    const to = [...draft.todos].sort((a, b) => Number(a.done) - Number(b.done)).map((t) => t.id);
+    record({ type: "reorderTodos", from, to });
+  }
+
   function undo(): OperationTarget | undefined {
     commitText();
     const op = history.undo();
@@ -131,11 +143,13 @@ export function useNoteEditor(initial: NoteInput) {
     isDirty,
     canUndo,
     canRedo,
+    canSortPendingFirst,
     setTitle,
     setTodoText,
     toggleTodo,
     addTodo,
     removeTodo,
+    sortPendingFirst,
     commitText,
     undo,
     redo,
