@@ -5,7 +5,8 @@
   "common": {
     "cancel": "Cancel",
     "confirm": "Confirm",
-    "close": "Close"
+    "close": "Close",
+    "delete": "Delete"
   },
   "header": {
     "home": "Go to home"
@@ -17,8 +18,29 @@
   "lang": {
     "label": "Interface language"
   },
+  "note": {
+    "untitled": "Untitled"
+  },
   "home": {
-    "title": "My notes"
+    "title": "My notes",
+    "notesCount": "no notes | {n} note | {n} notes",
+    "tasksDone": "no tasks | {done} of {n} task done | {done} of {n} tasks done",
+    "create": "New note",
+    "emptyTitle": "Nothing here yet",
+    "emptyText": "Create your first note and add tasks to it — progress shows right on the card.",
+    "emptyCreate": "Create a note",
+    "deleteTitle": "Delete note?",
+    "deleteText": "“{title}” and all its tasks will be permanently deleted.",
+    "deleted": "Note deleted"
+  },
+  "card": {
+    "done": "Done",
+    "progress": "{done} of {total}",
+    "more": "+ {n} more",
+    "noTodos": "No tasks yet",
+    "emptyTodo": "Empty task",
+    "edit": "Edit",
+    "delete": "Delete"
   },
   "storage": {
     "recovered": "Saved notes couldn't be read — a backup copy was kept"
