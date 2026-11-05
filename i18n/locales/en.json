@@ -1,0 +1,18 @@
+{
+  "app": {
+    "name": "Notes"
+  },
+  "header": {
+    "home": "Go to home"
+  },
+  "theme": {
+    "toDark": "Switch to dark theme",
+    "toLight": "Switch to light theme"
+  },
+  "lang": {
+    "label": "Interface language"
+  },
+  "home": {
+    "title": "My notes"
+  }
+}
