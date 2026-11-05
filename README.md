@@ -1,75 +1,33 @@
-# Nuxt Minimal Starter
+# Notes
 
-Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+A small SPA for notes with todo lists: a list of notes on the home page and an editor with undo/redo, drafts and cross-tab sync.
+
+## Stack
+
+- Nuxt 4 (SPA mode), Vue 3 Composition API, TypeScript (strict)
+- Pinia
+- SCSS, no UI libraries
+- @nuxtjs/i18n — English and Russian, picked from the browser language
+- Vitest
+
+## Requirements
+
+- Node.js 20 or newer
+- pnpm
 
 ## Setup
 
-Make sure to install dependencies:
-
 ```bash
-# npm
-npm install
-
-# pnpm
 pnpm install
-
-# yarn
-yarn install
-
-# bun
-bun install
 ```
 
-## Development Server
-
-Start the development server on `http://localhost:3000`:
+## Commands
 
 ```bash
-# npm
-npm run dev
-
-# pnpm
-pnpm dev
-
-# yarn
-yarn dev
-
-# bun
-bun run dev
+pnpm dev                  # dev server at http://localhost:3000
+pnpm build                # production build
+pnpm preview              # preview the production build
+pnpm generate             # static build into .output/public
+pnpm test                 # unit tests
+pnpm exec nuxi typecheck  # type check
 ```
-
-## Production
-
-Build the application for production:
-
-```bash
-# npm
-npm run build
-
-# pnpm
-pnpm build
-
-# yarn
-yarn build
-
-# bun
-bun run build
-```
-
-Locally preview production build:
-
-```bash
-# npm
-npm run preview
-
-# pnpm
-pnpm preview
-
-# yarn
-yarn preview
-
-# bun
-bun run preview
-```
-
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
