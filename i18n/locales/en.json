@@ -19,5 +19,8 @@
   },
   "home": {
     "title": "My notes"
+  },
+  "storage": {
+    "recovered": "Saved notes couldn't be read — a backup copy was kept"
   }
 }
