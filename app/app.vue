@@ -14,6 +14,8 @@ useHead({
   <main class="main">
     <NuxtPage />
   </main>
+  <AppModalHost />
+  <AppToasts />
 </template>
 
 <style lang="scss" scoped>

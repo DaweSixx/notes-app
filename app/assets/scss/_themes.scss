@@ -33,6 +33,8 @@
   --hover: rgba(99, 102, 241, 0.08);
   --input-bg: rgba(255, 255, 255, 0.6);
   --tip-bg: #1b1d36;
+  --success-text: #059669;
+  --warning-text: #d97706;
 }
 
 [data-theme="dark"] {
@@ -51,4 +53,6 @@
   --hover: rgba(139, 92, 246, 0.12);
   --input-bg: rgba(255, 255, 255, 0.04);
   --tip-bg: #2a2c52;
+  --success-text: #34d399;
+  --warning-text: #fbbf24;
 }

@@ -45,6 +45,19 @@ a {
   background: rgba(139, 92, 246, 0.25);
 }
 
+kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  padding: 3px 6px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--hover);
+  color: var(--muted);
+  font: 700 11.5px/1 var(--font);
+}
+
 .sr-only {
   position: absolute;
   width: 1px;
