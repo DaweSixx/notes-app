@@ -1,0 +1,14 @@
+node_modules
+.nuxt
+.output
+.data
+.cache
+.git
+.claude
+.vscode
+.idea
+*.log
+design-prototype*.html
+Dockerfile
+docker-compose.yaml
+.dockerignore

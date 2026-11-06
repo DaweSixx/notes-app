@@ -10,10 +10,18 @@ A small SPA for notes with todo lists: a list of notes on the home page and an e
 - @nuxtjs/i18n — English and Russian, picked from the browser language
 - Vitest
 
+## Docker
+
+```bash
+docker-compose up
+```
+
+The app is served at http://localhost:8080. The image build runs the unit tests and the type check, then serves the static build with nginx.
+
 ## Requirements
 
 - Node.js 20 or newer
-- pnpm
+- pnpm 11
 
 ## Setup
 
