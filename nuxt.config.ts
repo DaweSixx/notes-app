@@ -32,7 +32,7 @@ export default defineNuxtConfig({
                 {
                     // sets the theme before Vue mounts, otherwise the page flashes light in dark mode
                     innerHTML:
-                        "(function(){var t;try{t=localStorage.getItem('notes-theme')}catch(e){}" +
+                        "(function(){var t;try{t=localStorage.getItem('notes-app:theme')}catch(e){}" +
                         "if(t!=='light'&&t!=='dark'){t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}" +
                         "document.documentElement.dataset.theme=t})()",
                 },
@@ -53,5 +53,5 @@ export default defineNuxtConfig({
         },
     },
     compatibilityDate: "2025-07-15",
-    devtools: { enabled: true },
+    devtools: { enabled: false },
 });

@@ -30,7 +30,7 @@ defineExpose({ focus: () => input.value?.focus() });
       :aria-label="t('editor.addLabel')"
       autocomplete="off"
       enterkeyhint="done"
-    />
+    >
     <kbd>Enter</kbd>
   </form>
 </template>

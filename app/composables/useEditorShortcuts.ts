@@ -4,7 +4,6 @@ interface EditorShortcutHandlers {
   save: () => void;
 }
 
-// e.key is "я" for Ctrl+Z on a Russian layout, so fall back to the physical key
 function isKey(event: KeyboardEvent, letter: "z" | "s"): boolean {
   const key = event.key.toLowerCase();
   if (/^[a-z]$/.test(key)) return key === letter;
@@ -18,7 +17,6 @@ export function useEditorShortcuts(handlers: EditorShortcutHandlers) {
     if (hasOpen.value || event.altKey || !(event.ctrlKey || event.metaKey)) return;
 
     if (isKey(event, "z")) {
-      // fields outside the note (e.g. "add task") keep the browser's own undo
       if (event.target instanceof Element && event.target.closest("[data-native-undo]")) return;
       event.preventDefault();
       if (event.shiftKey) handlers.redo();

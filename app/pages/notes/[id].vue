@@ -4,7 +4,6 @@ import NoteNotFound from "~/components/notes/NoteNotFound.vue";
 import { useNotesStore } from "~/stores/notes";
 import type { NoteInput } from "~/types/note";
 
-// one page instance for all notes: switching between them is handled by the editor key below
 definePageMeta({ key: "note-editor" });
 
 interface EditorSession {
@@ -28,12 +27,13 @@ function resolve(id: string): EditorSession | null {
   return { noteId: note.id, initial: { title: note.title, todos: note.todos }, updatedAt: note.updatedAt };
 }
 
-// snapshot on open: the editor works on its own copy from here on
 const session = shallowRef(resolve(editorKey.value));
 
 watch(routeId, (id) => {
-  // the URL of a just-created note changes from /notes/new — keep the same editor
-  if (id === createdId) return;
+  if (id === createdId) {
+    createdId = null;
+    return;
+  }
   editorKey.value = id;
   session.value = resolve(id);
 });

@@ -24,7 +24,6 @@ const stats = computed(() => {
   return `${notes} · ${tasks}`;
 });
 
-// relative dates on the cards ("5 min ago") need a clock to stay fresh
 const now = ref(Date.now());
 let clock: ReturnType<typeof setInterval> | undefined;
 onMounted(() => {
@@ -40,12 +39,16 @@ async function onDelete(note: Note) {
     confirmText: t("common.delete"),
   });
   if (!confirmed) return;
-  store.remove(note.id);
+  try {
+    store.remove(note.id);
+  } catch {
+    toast.show(t("editor.saveFailed"), "warn");
+    return;
+  }
   draftKeys.remove(note.id);
   toast.show(t("home.deleted"));
 }
 
-// lift the leaving card out of the grid so the others can glide into its place
 function onBeforeLeave(el: Element) {
   const node = el as HTMLElement;
   const { offsetLeft, offsetTop, offsetWidth, offsetHeight } = node;
@@ -73,30 +76,22 @@ function onBeforeLeave(el: Element) {
     </div>
 
     <Transition name="swap" mode="out-in">
-      <TransitionGroup
-        v-if="store.notes.length"
-        tag="div"
-        name="card"
-        class="grid"
-        @before-leave="onBeforeLeave"
-      >
+      <TransitionGroup v-if="store.notes.length" tag="div" name="card" class="grid" @before-leave="onBeforeLeave">
         <NoteCard
-          v-for="(note, index) in store.sortedNotes"
-          :key="note.id"
-          :note="note"
-          :index="index"
-          :now="now"
-          :has-draft="draftKeys.has(note.id)"
-          @delete="onDelete(note)"
-        />
+v-for="(note, index) in store.sortedNotes" :key="note.id" :note="note" :index="index" :now="now"
+          :has-draft="draftKeys.has(note.id)" @delete="onDelete(note)" />
         <NuxtLink key="new" to="/notes/new" class="new-card" :style="{ '--i': store.notes.length }">
-          <span class="plus"><BaseIcon name="plus" :size="24" /></span>
+          <span class="plus">
+            <BaseIcon name="plus" :size="24" />
+          </span>
           {{ t("home.create") }}
         </NuxtLink>
       </TransitionGroup>
 
       <div v-else class="empty">
-        <div class="empty-art"><BaseIcon name="sparkle" :size="44" /></div>
+        <div class="empty-art">
+          <BaseIcon name="sparkle" :size="44" />
+        </div>
         <h2 class="empty-title">{{ t("home.emptyTitle") }}</h2>
         <p class="empty-text">{{ t("home.emptyText") }}</p>
         <BaseButton to="/notes/new" icon="plus">{{ t("home.emptyCreate") }}</BaseButton>

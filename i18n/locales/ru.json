@@ -4,9 +4,10 @@
   },
   "common": {
     "cancel": "Отмена",
-    "confirm": "Подтвердить",
-    "close": "Закрыть",
     "delete": "Удалить"
+  },
+  "progress": {
+    "label": "Выполнено {done} из {total}"
   },
   "header": {
     "home": "На главную"

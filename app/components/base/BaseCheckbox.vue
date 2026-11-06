@@ -13,7 +13,7 @@ function onChange(event: Event) {
 
 <template>
   <label class="check">
-    <input v-model="model" type="checkbox" :aria-label="label" @change="onChange" />
+    <input v-model="model" type="checkbox" :aria-label="label" @change="onChange" >
     <span class="box" :class="{ pop }" aria-hidden="true" @animationend="pop = false">
       <svg viewBox="0 0 24 24">
         <path d="M5 12.5l4.5 4.5L19 7.5" />

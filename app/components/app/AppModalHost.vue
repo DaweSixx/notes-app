@@ -18,16 +18,14 @@ watch(
 </script>
 
 <template>
-  <Teleport to="body">
-    <TransitionGroup name="modal" :duration="{ enter: 400, leave: 200 }">
-      <BaseModal
-        v-for="(entry, index) in stack"
-        :key="entry.id"
-        :active="index === stack.length - 1"
-        @dismiss="close(entry.id)"
-      >
-        <component :is="entry.component" v-bind="entry.props" @resolve="close(entry.id, $event)" />
-      </BaseModal>
-    </TransitionGroup>
-  </Teleport>
+  <TransitionGroup name="modal" :duration="{ enter: 400, leave: 200 }">
+    <BaseModal
+      v-for="(entry, index) in stack"
+      :key="entry.id"
+      :active="index === stack.length - 1"
+      @dismiss="close(entry.id)"
+    >
+      <component :is="entry.component" v-bind="entry.props" @resolve="close(entry.id, $event)" />
+    </BaseModal>
+  </TransitionGroup>
 </template>

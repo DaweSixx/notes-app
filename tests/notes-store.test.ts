@@ -101,6 +101,17 @@ describe("notes store", () => {
     expect(store.sortedNotes.map((note) => note.id)).toEqual(["new", "mid", "old"]);
   });
 
+  it("keeps the state unchanged when writing to storage fails", () => {
+    const { store, storage } = setup();
+    storage.failWrites = true;
+
+    expect(() => store.create({ title: "Ideas", todos: [] })).toThrow();
+    expect(() => store.update("n1", { title: "Groceries", todos: [] })).toThrow();
+    expect(() => store.remove("n1")).toThrow();
+
+    expect(store.notes).toEqual([makeNote()]);
+  });
+
   it("picks up changes written by another tab", () => {
     const { store, storage } = setup();
     storage.setItem(STORAGE_KEY, JSON.stringify({ version: 1, notes: [] }));

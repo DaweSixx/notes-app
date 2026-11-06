@@ -5,9 +5,8 @@ import NoteTodoAdd from "~/components/notes/NoteTodoAdd.vue";
 import NoteTodoItem from "~/components/notes/NoteTodoItem.vue";
 import { useNotesStore } from "~/stores/notes";
 import type { NoteInput } from "~/types/note";
-import { NEW_NOTE_DRAFT, type Draft } from "~/utils/drafts";
+import { NEW_NOTE_DRAFT } from "~/utils/drafts";
 import { formatRelativeDate } from "~/utils/format-date";
-import type { OperationTarget } from "~/utils/note-operations";
 import { isBlankNote, isBlankText, normalizeForSave } from "~/utils/note-rules";
 
 const props = defineProps<{
@@ -34,25 +33,12 @@ const deletedElsewhere = computed(
   () => noteId.value !== null && !removedHere.value && !store.getById(noteId.value),
 );
 const blank = computed(() => isBlankNote(draft));
-// a note that doesn't exist yet (new, or deleted in another tab) can't be saved empty
 const canSave = computed(() => {
   const willCreate = noteId.value === null || deletedElsewhere.value;
   if (willCreate) return !blank.value;
   return isDirty.value;
 });
 const showTitleHint = computed(() => isBlankText(draft.title) && !blank.value);
-
-// drafts
-const pendingDraft = shallowRef<Draft | null>(null);
-
-// sync: has to run before useDraft reacts to the same edit and schedules a new draft write
-watch(
-  () => JSON.stringify(draft),
-  () => {
-    if (pendingDraft.value) declineDraft();
-  },
-  { flush: "sync" },
-);
 
 const drafts = useDraft({
   key: () => noteId.value ?? NEW_NOTE_DRAFT,
@@ -61,35 +47,29 @@ const drafts = useDraft({
   baseUpdatedAt: () => updatedAt.value,
 });
 
-const foundDraft = drafts.read();
-if (foundDraft) {
-  const sameAsSaved =
-    JSON.stringify({ title: foundDraft.title, todos: foundDraft.todos }) ===
-    JSON.stringify({ title: props.initial.title, todos: props.initial.todos });
-  if (sameAsSaved) drafts.discard();
-  else pendingDraft.value = foundDraft;
-}
+const draftPrompt = useDraftPrompt({
+  found: drafts.read(),
+  saved: props.initial,
+  savedUpdatedAt: props.updatedAt,
+  content: () => draft,
+  discard: () => drafts.discard(),
+  restore: (content) => editor.restore(content),
+});
+const { pending: pendingDraft, isStale: draftIsStale } = draftPrompt;
 
 const draftText = computed(() => {
   const found = pendingDraft.value;
   if (!found) return "";
   const date = formatRelativeDate(found.savedAt, locale.value);
-  return found.baseUpdatedAt === props.updatedAt
-    ? t("draft.foundText", { date })
-    : t("draft.foundStale", { date });
+  return draftIsStale.value ? t("draft.foundStale", { date }) : t("draft.foundText", { date });
 });
 
 function restoreDraft() {
-  const found = pendingDraft.value;
-  if (!found) return;
-  pendingDraft.value = null;
-  editor.restore({ title: found.title, todos: found.todos });
-  toast.show(t("draft.restored"));
+  if (draftPrompt.restore()) toast.show(t("draft.restored"));
 }
 
 function declineDraft() {
-  pendingDraft.value = null;
-  drafts.discard();
+  draftPrompt.decline();
 }
 
 const total = computed(() => draft.todos.length);
@@ -104,41 +84,12 @@ const titleInput = ref<HTMLInputElement | null>(null);
 const list = ref<HTMLElement | null>(null);
 const addRow = ref<InstanceType<typeof NoteTodoAdd> | null>(null);
 
-function flash(el: HTMLElement) {
-  el.classList.remove("flash");
-  void el.offsetWidth;
-  el.classList.add("flash");
-  el.addEventListener("animationend", () => el.classList.remove("flash"), { once: true });
-}
-
-function focusEnd(el: HTMLInputElement | HTMLTextAreaElement) {
-  el.focus();
-  el.setSelectionRange(el.value.length, el.value.length);
-}
-
-function focusTodo(id: string): HTMLElement | null {
-  const row = list.value?.querySelector<HTMLElement>(`[data-todo-id="${CSS.escape(id)}"]`);
-  const field = row?.querySelector("textarea");
-  if (!row || !field) return null;
-  focusEnd(field);
-  return row;
-}
-
-function focusTarget(target: OperationTarget | undefined) {
-  if (!target || target.field === "list") return;
-  nextTick(() => {
-    if (target.field === "title") {
-      if (!titleInput.value) return;
-      focusEnd(titleInput.value);
-      flash(titleInput.value);
-    } else if (target.exists) {
-      const row = focusTodo(target.todoId);
-      if (row) flash(row);
-    } else {
-      addRow.value?.focus();
-    }
-  });
-}
+const { focusTarget, focusAfter, focusTodoOrAdd } = useEditorFocus({
+  title: titleInput,
+  list,
+  todos: () => draft.todos,
+  focusAdd: () => addRow.value?.focus(),
+});
 
 function undo() {
   focusTarget(editor.undo());
@@ -148,19 +99,11 @@ function redo() {
   focusTarget(editor.redo());
 }
 
-function focusAfter(id: string | undefined) {
-  const index = id === undefined ? -1 : draft.todos.findIndex((todo) => todo.id === id);
-  const next = draft.todos[index + 1];
-  if (!next || !focusTodo(next.id)) addRow.value?.focus();
-}
-
 function onRemove(id: string) {
   const index = draft.todos.findIndex((todo) => todo.id === id);
   const neighbour = draft.todos[index + 1] ?? draft.todos[index - 1];
   editor.removeTodo(id);
-  nextTick(() => {
-    if (!neighbour || !focusTodo(neighbour.id)) addRow.value?.focus();
-  });
+  nextTick(() => focusTodoOrAdd(neighbour?.id));
 }
 
 function save() {
@@ -186,7 +129,6 @@ function save() {
     return;
   }
 
-  // the draft key changes when a note gets created — drop the one stored under the old key
   if (previousDraftKey !== noteId.value) drafts.discard(previousDraftKey);
   editor.markSaved(input);
   updatedAt.value = savedAt;
@@ -214,7 +156,7 @@ async function cancel() {
         },
   );
   if (!confirmed) return;
-  pendingDraft.value = null;
+  draftPrompt.dismiss();
   editor.discardChanges();
   drafts.discard();
   await navigateTo("/");
@@ -245,7 +187,6 @@ onMounted(() => {
   if (noteId.value === null) titleInput.value?.focus();
 });
 
-// collapse the removed row so the rows below slide up instead of jumping
 function lockHeight(el: Element) {
   const node = el as HTMLElement;
   node.style.height = `${node.offsetHeight}px`;
@@ -304,8 +245,8 @@ function lockHeight(el: Element) {
         maxlength="200"
         @input="editor.setTitle(($event.target as HTMLInputElement).value)"
         @blur="editor.commitText()"
-        @keydown.enter.prevent="focusAfter(undefined)"
-      />
+        @keydown.enter.prevent="focusAfter()"
+      >
       <Transition name="hint">
         <p v-if="showTitleHint" class="hint">
           <BaseIcon name="alert" :size="14" />

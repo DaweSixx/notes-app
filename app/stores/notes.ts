@@ -18,8 +18,10 @@ export const useNotesStore = defineStore("notes", () => {
     return notes.value.find((note) => note.id === id);
   }
 
-  function persist() {
-    if (storage) saveNotes(storage, notes.value);
+  // write first: if storage throws (e.g. quota), the in-memory state stays as it was
+  function commit(next: Note[]) {
+    if (storage) saveNotes(storage, next);
+    notes.value = next;
   }
 
   function load(target: KeyValueStorage): LoadResult {
@@ -42,26 +44,27 @@ export const useNotesStore = defineStore("notes", () => {
       createdAt: now,
       updatedAt: now,
     };
-    notes.value.push(note);
-    persist();
+    commit([...notes.value, note]);
     return note;
   }
 
   function update(id: string, input: NoteInput): Note | undefined {
-    const note = getById(id);
-    if (!note) return undefined;
-    note.title = input.title;
-    note.todos = copyTodos(input.todos);
-    note.updatedAt = Date.now();
-    persist();
-    return note;
+    const current = getById(id);
+    if (!current) return undefined;
+    const updated: Note = {
+      ...current,
+      title: input.title,
+      todos: copyTodos(input.todos),
+      updatedAt: Date.now(),
+    };
+    commit(notes.value.map((note) => (note.id === id ? updated : note)));
+    return updated;
   }
 
   function remove(id: string): boolean {
     const next = notes.value.filter((note) => note.id !== id);
     if (next.length === notes.value.length) return false;
-    notes.value = next;
-    persist();
+    commit(next);
     return true;
   }
 

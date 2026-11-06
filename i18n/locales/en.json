@@ -4,9 +4,10 @@
   },
   "common": {
     "cancel": "Cancel",
-    "confirm": "Confirm",
-    "close": "Close",
     "delete": "Delete"
+  },
+  "progress": {
+    "label": "{done} of {total} done"
   },
   "header": {
     "home": "Go to home"

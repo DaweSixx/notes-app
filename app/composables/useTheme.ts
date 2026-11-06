@@ -1,6 +1,6 @@
 export type Theme = "light" | "dark";
 
-const STORAGE_KEY = "notes-theme";
+const STORAGE_KEY = "notes-app:theme";
 
 export function useTheme() {
   const theme = useState<Theme>("theme", () =>

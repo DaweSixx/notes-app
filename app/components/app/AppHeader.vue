@@ -4,7 +4,7 @@ const { t } = useI18n();
 
 <template>
   <header class="header">
-    <NuxtLink to="/" class="logo" :aria-label="t('header.home')">
+    <NuxtLink to="/" class="logo" :title="t('header.home')">
       <span class="logo-mark">
         <BaseIcon name="note" />
       </span>

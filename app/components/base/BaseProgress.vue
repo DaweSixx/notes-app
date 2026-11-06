@@ -8,6 +8,8 @@ const props = withDefaults(
   { size: "sm" },
 );
 
+const { t } = useI18n();
+
 const percent = computed(() => (props.total ? Math.round((props.done / props.total) * 100) : 0));
 const complete = computed(() => props.total > 0 && props.done === props.total);
 
@@ -29,6 +31,7 @@ watch(
     class="progress"
     :class="[size, { complete, pulse }]"
     role="progressbar"
+    :aria-label="t('progress.label', { done, total })"
     aria-valuemin="0"
     :aria-valuemax="total"
     :aria-valuenow="done"

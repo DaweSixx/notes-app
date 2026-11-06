@@ -64,9 +64,11 @@
   0% {
     transform: translate(0, 0) scale(1);
   }
+
   50% {
     transform: translate(70px, -50px) scale(1.1);
   }
+
   100% {
     transform: translate(-50px, 40px) scale(0.95);
   }

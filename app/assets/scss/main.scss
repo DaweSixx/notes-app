@@ -4,103 +4,102 @@
 *,
 *::before,
 *::after {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
 body {
-  min-height: 100vh;
-  font-family: var(--font);
-  line-height: 1.5;
-  background: var(--bg);
-  color: var(--text);
-  -webkit-font-smoothing: antialiased;
-  transition:
-    background-color 0.5s var(--ease),
-    color 0.3s;
+    min-height: 100vh;
+    font-family: var(--font);
+    line-height: 1.5;
+    background: var(--bg);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    transition:
+        background-color 0.5s var(--ease),
+        color 0.3s;
 }
 
 button,
 input,
 textarea {
-  font: inherit;
-  color: inherit;
+    font: inherit;
+    color: inherit;
 }
 
 button {
-  cursor: pointer;
+    cursor: pointer;
 }
 
 a {
-  color: inherit;
+    color: inherit;
 }
 
 :focus-visible {
-  outline: 2px solid var(--primary-2);
-  outline-offset: 2px;
+    outline: 2px solid var(--primary-2);
+    outline-offset: 2px;
 }
 
 ::selection {
-  background: rgba(139, 92, 246, 0.25);
+    background: rgba(139, 92, 246, 0.25);
 }
 
 kbd {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 20px;
-  padding: 3px 6px;
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  background: var(--hover);
-  color: var(--muted);
-  font: 700 11.5px/1 var(--font);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    padding: 3px 6px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--hover);
+    color: var(--muted);
+    font: 700 11.5px/1 var(--font);
 }
 
 .sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  white-space: nowrap;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
 }
 
-// briefly highlights what undo/redo just changed
 .flash {
-  animation: flash 0.9s var(--ease);
+    animation: flash 0.9s var(--ease);
 }
 
 @keyframes flash {
-  from {
-    background-color: rgba(139, 92, 246, 0.22);
-  }
+    from {
+        background-color: rgba(139, 92, 246, 0.22);
+    }
 }
 
 .page-enter-active,
 .page-leave-active {
-  transition:
-    opacity 0.35s var(--ease),
-    transform 0.35s var(--ease);
+    transition:
+        opacity 0.35s var(--ease),
+        transform 0.35s var(--ease);
 }
 
 .page-enter-from {
-  opacity: 0;
-  transform: translateY(16px);
+    opacity: 0;
+    transform: translateY(16px);
 }
 
 .page-leave-to {
-  opacity: 0;
-  transform: translateY(-8px);
+    opacity: 0;
+    transform: translateY(-8px);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
 }
