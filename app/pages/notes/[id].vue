@@ -1,6 +1,6 @@
 <script setup lang="ts">
+import AppNotFound from "~/components/app/AppNotFound.vue";
 import NoteEditor from "~/components/notes/NoteEditor.vue";
-import NoteNotFound from "~/components/notes/NoteNotFound.vue";
 import { useNotesStore } from "~/stores/notes";
 import type { NoteInput } from "~/types/note";
 
@@ -15,6 +15,7 @@ interface EditorSession {
 const route = useRoute();
 const router = useRouter();
 const store = useNotesStore();
+const { t } = useI18n();
 
 const routeId = computed(() => String(route.params.id));
 const editorKey = ref(routeId.value);
@@ -53,5 +54,5 @@ function onCreated(id: string) {
     :updated-at="session.updatedAt"
     @created="onCreated"
   />
-  <NoteNotFound v-else />
+  <AppNotFound v-else :title="t('notFound.noteTitle')" :text="t('notFound.noteText')" />
 </template>

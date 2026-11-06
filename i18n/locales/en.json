@@ -94,8 +94,10 @@
     "restored": "Draft restored"
   },
   "notFound": {
-    "title": "Note not found",
-    "text": "It may have been deleted, or the link is outdated.",
+    "noteTitle": "Note not found",
+    "noteText": "It may have been deleted, or the link is outdated.",
+    "pageTitle": "Page not found",
+    "pageText": "There's no such page — the address may contain a typo.",
     "back": "Back to notes"
   },
   "storage": {

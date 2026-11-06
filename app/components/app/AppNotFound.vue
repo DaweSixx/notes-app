@@ -1,12 +1,14 @@
 <script setup lang="ts">
+defineProps<{ title: string; text: string }>();
+
 const { t } = useI18n();
 </script>
 
 <template>
   <section class="not-found">
     <div class="code" aria-hidden="true">404</div>
-    <h1 class="title">{{ t("notFound.title") }}</h1>
-    <p class="text">{{ t("notFound.text") }}</p>
+    <h1 class="title">{{ title }}</h1>
+    <p class="text">{{ text }}</p>
     <BaseButton to="/" icon="arrowLeft">{{ t("notFound.back") }}</BaseButton>
   </section>
 </template>
